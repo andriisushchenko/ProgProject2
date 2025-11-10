@@ -1,4 +1,4 @@
-//Compiler - CLion
+//Compiler - gcc
 #include <iostream>
 #include <vector>
 #include <algorithm>
@@ -35,7 +35,7 @@ double slow_op(double x) {
 double measure_transform(const std::vector<double>& data, auto op) {
     std::vector<double> result(data.size());
     auto start = std::chrono::high_resolution_clock::now();
-    std::transform(data.begin(), data.end(), result.begin(), op);
+    std::transform(data.cbegin(), data.cend(), result.begin(), op);
     auto end = std::chrono::high_resolution_clock::now();
     return std::chrono::duration<double>(end - start).count();
 }
@@ -43,7 +43,7 @@ double measure_transform(const std::vector<double>& data, auto op) {
 double measure_policy_transform(const std::vector<double>& data, auto op, auto policy) {
     std::vector<double> result(data.size());
     auto start = std::chrono::high_resolution_clock::now();
-    std::transform(policy, data.begin(), data.end(), result.begin(), op);
+    std::transform(policy, data.cbegin(), data.cend(), result.begin(), op);
     auto end = std::chrono::high_resolution_clock::now();
     return std::chrono::duration<double>(end - start).count();
 }
@@ -63,7 +63,7 @@ double measure_custom_parallel_transform(const std::vector<double>& data, auto o
     for (int i = 0; i < K; ++i) {
         size_t current_end = current_start + chunk_size + (i < remainder ? 1 : 0);
         threads.emplace_back([&, current_start, current_end]() {
-            std::transform(data.begin() + current_start, data.begin() + current_end,
+            std::transform(data.cbegin() + current_start, data.cbegin() + current_end,
                            result.begin() + current_start, op);
         });
         current_start = current_end;
@@ -138,7 +138,7 @@ int main() {
     unsigned int num_cores = std::thread::hardware_concurrency();
     std::cout << "Number of processor threads: " << num_cores << std::endl << std::endl;
 
-    std::vector<int> K_values = {1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048};
+    std::vector<int> K_values = {1, 2, 4, 8, 16, 32};
 
     std::vector<std::pair<std::string, std::function<double(double)>>> ops = {
         {"fast", fast_op},
